@@ -18,6 +18,16 @@ export class EntityNotFoundException extends DomainException {
   }
 }
 
+// Entity already exists
+export class EntityAlreadyExistsException extends DomainException {
+  constructor(entityName: string, identifier?: string) {
+    const message = identifier
+      ? `${entityName} with this ${identifier} already exists`
+      : `${entityName} already exists`;
+    super(message, HttpStatus.CONFLICT);
+  }
+}
+
 // Value object exceptions
 export class InvalidValueObjectException extends DomainException {
   constructor(message: string) {

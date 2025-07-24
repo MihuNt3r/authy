@@ -1,7 +1,7 @@
 import { Email } from '../value-objects/email.vo';
 import { Name } from '../value-objects/name.vo';
-import { Username } from '@core/value-objects/username.vo';
-import { UserId } from '@core/value-objects/user-id.vo';
+import { Username } from '../value-objects/username.vo';
+import { UserId } from '../value-objects/user-id.vo';
 
 export class User {
   private readonly _id: UserId;

@@ -4,10 +4,24 @@ import { AppService } from './app.service';
 import { UsersService } from './services/users/users.service';
 import { UsersController } from './controllers/users/users.controller';
 import { DrizzleModule } from './drizzle/drizzle.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [DrizzleModule, ConfigModule.forRoot({ isGlobal: true })],
+  imports: [
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get('JWT_ACCESS_EXPIRATION', '15m'),
+        },
+      }),
+    }),
+    DrizzleModule,
+    ConfigModule.forRoot({ isGlobal: true })
+  ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
 })
