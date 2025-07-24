@@ -11,6 +11,22 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export class RegisterUserDto {
   @ApiProperty({
+    description: 'User name',
+    example: 'John Doe',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiProperty({
+    description: 'User name',
+    example: 'John Doe',
+  })
+  @IsString()
+  @IsNotEmpty()
+  username!: string;
+
+  @ApiProperty({
     description: 'User email address',
     example: 'user@example.com',
   })
@@ -35,20 +51,4 @@ export class RegisterUserDto {
     },
   )
   password!: string;
-
-  @ApiProperty({
-    description: 'User first name',
-    example: 'John',
-  })
-  @IsString()
-  @IsNotEmpty()
-  firstName!: string;
-
-  @ApiProperty({
-    description: 'User last name',
-    example: 'Doe',
-  })
-  @IsString()
-  @IsNotEmpty()
-  lastName!: string;
 }

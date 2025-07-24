@@ -63,7 +63,7 @@ export class UsersController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid credentials',
   })
-  async getInfo() {
-    return await this.usersService.getInfo();
+  getInfo() {
+    return this.usersService.getInfo();
   }
 }
