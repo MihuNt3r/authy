@@ -2,7 +2,15 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
-  getUsers() {
-    return [{ id: 1, name: 'John' }];
+  async register(): Promise<void> {
+    await Promise.resolve();
+  }
+
+  async login(): Promise<void> {
+    await Promise.resolve();
+  }
+
+  async getInfo(): Promise<void> {
+    await Promise.resolve();
   }
 }
