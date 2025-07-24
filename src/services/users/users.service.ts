@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../../dtos/users/register.dto';
 import { Name } from '@core/value-objects/name.vo';
 import { Username } from '@core/value-objects/username.vo';
@@ -7,11 +7,18 @@ import { Password } from '@core/value-objects/password.vo';
 import { LoginDto } from '../../dtos/users/login.dto';
 import { User } from '@core/entities/user.entity';
 
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '../../drizzle/schema';
+import { DrizzleAsyncProvider } from '../../drizzle/drizzle.provider';
+
 @Injectable()
 export class UsersService {
   private readonly users: Array<User>;
 
-  constructor() {
+  constructor(
+    @Inject(DrizzleAsyncProvider)
+    private db: NodePgDatabase<typeof schema>,
+  ) {
     this.users = [];
   }
 
@@ -37,7 +44,9 @@ export class UsersService {
     await Promise.resolve();
   }
 
-  getInfo(): Array<User> {
-    return this.users;
+  async getInfo() {
+    const user = await this.db.query.users.findFirst({});
+
+    return user;
   }
 }
