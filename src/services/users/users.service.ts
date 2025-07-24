@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../../dtos/users/register.dto';
 import { Email } from '@core/value-objects/email.vo';
 import { Password } from '@core/value-objects/password.vo';
+import { LoginDto } from '../../dtos/users/login.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,8 @@ export class UsersService {
     );
   }
 
-  async login(): Promise<void> {
+  async login(login: LoginDto): Promise<void> {
+    console.log({ login });
     await Promise.resolve();
   }
 
