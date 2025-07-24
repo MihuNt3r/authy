@@ -5,11 +5,13 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from '../../services/users/users.service';
 import { RegisterUserDto } from '../../dtos/users/register.dto';
 import { LoginDto } from '../../dtos/users/login.dto';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Controller('users')
 export class UsersController {
@@ -63,7 +65,15 @@ export class UsersController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid credentials',
   })
-  getInfo() {
-    return this.usersService.getInfo();
+  async getInfo(@Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Missing or malformed Authorization header');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    return await this.usersService.getInfo(token);
   }
 }

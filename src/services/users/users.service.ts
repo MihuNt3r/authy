@@ -87,7 +87,13 @@ export class UsersService {
     return { token };
   }
 
-  async getInfo() {
+  async getInfo(token: string) {
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get('JWT_SECRET'),
+    });
+
+    console.log('JWT payload:', payload);
+
     const user = await this.db.query.users.findFirst({});
 
     return user;
