@@ -94,9 +94,17 @@ export class UsersService {
 
     console.log('JWT payload:', payload);
 
-    const user = await this.db.query.users.findFirst({});
+    const user = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.email, payload.email),
+    });
 
-    return user;
+    if (!user) {
+      throw new EntityNotFoundException('User');
+    }
+
+    const { passwordHash, ...safeUser } = user;
+
+    return safeUser;
   }
 
   async hashPassword(password: string): Promise<string> {
