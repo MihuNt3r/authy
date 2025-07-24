@@ -17,7 +17,6 @@ import { UnauthorizedException } from '@nestjs/common';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
@@ -37,7 +36,6 @@ export class UsersController {
     return await this.usersService.register(registerUserDto);
   }
 
-  // @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate user and get tokens' })

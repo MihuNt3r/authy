@@ -14,7 +14,7 @@ import { DrizzleAsyncProvider } from '../../drizzle/drizzle.provider';
 import {
   EntityAlreadyExistsException,
   EntityNotFoundException,
-} from '@core/exceptions/domain-exceptions';
+} from '../../core/exceptions/domain-exceptions';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 

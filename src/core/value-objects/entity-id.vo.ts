@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { InvalidValueObjectException } from '@core/exceptions/domain-exceptions';
+import { InvalidValueObjectException } from '../exceptions/domain-exceptions';
 
 /**
  * Base class for strongly-typed entity identifiers
