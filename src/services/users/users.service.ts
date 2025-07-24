@@ -1,16 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { RegisterUserDto } from '../../dtos/users/register.dto';
+import { Email } from '@core/value-objects/email.vo';
+import { Password } from '@core/value-objects/password.vo';
 
 @Injectable()
 export class UsersService {
-  async register(): Promise<void> {
-    await Promise.resolve();
+  async register(registerUserDto: RegisterUserDto): Promise<void> {
+    const email = new Email(registerUserDto.email);
+    const password = new Password(registerUserDto.password);
+
+    console.log({ email, password });
+
+    await new Promise((resolve) =>
+      setTimeout(() => resolve({ id: 'Huy' }), 2000),
+    );
   }
 
   async login(): Promise<void> {
     await Promise.resolve();
   }
 
-  async getInfo(): Promise<void> {
-    await Promise.resolve();
+  async getInfo(): Promise<unknown> {
+    const result = await new Promise((resolve) =>
+      setTimeout(() => resolve({ id: 'Huy' }), 2000),
+    );
+
+    return result;
   }
 }
