@@ -22,7 +22,7 @@ export class UsersService {
     this.users = [];
   }
 
-  async register(registerUserDto: RegisterUserDto): Promise<{ users: User[] }> {
+  async register(registerUserDto: RegisterUserDto) {
     const email = new Email(registerUserDto.email);
     const username = new Username(registerUserDto.username);
     const name = new Name(registerUserDto.name);
@@ -32,11 +32,15 @@ export class UsersService {
 
     console.log({ newUser });
 
-    this.users.push(newUser);
+    await this.db.insert(schema.users).values({
+      id: newUser.id.getValue(),
+      email: newUser.email.getValue(),
+      username: newUser.username.getValue(),
+      name: newUser.name.getValue(),
+      passwordHash: newUser.passwordHash,
+    });
 
-    return await new Promise((resolve) =>
-      setTimeout(() => resolve({ users: this.users }), 2000),
-    );
+    console.log('User successfully inserted');
   }
 
   async login(login: LoginDto): Promise<void> {
