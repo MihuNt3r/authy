@@ -73,6 +73,30 @@ Swagger UI is available at `/api` when the server is running.
 - `src/controllers/` - API controllers
 - `src/drizzle/` - Database schema and migrations
 
+## Running with Docker Compose
+
+To start the service and its dependencies (PostgreSQL and Redis) using Docker Compose:
+
+1. Make sure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+2. In your project root, run:
+
+    ```sh
+    docker-compose up --build
+    ```
+
+This will:
+- Build the application image.
+- Start the PostgreSQL and Redis containers.
+- Run database migrations automatically.
+- Start the NestJS API server on port `3000`.
+
+You can access the API at [http://localhost:3000](http://localhost:3000) and Swagger documentation at [http://localhost:3000/api](http://localhost:3000/api).
+
+To stop the services, press `Ctrl+C` or run:
+
+```sh
+docker-compose down
+
 ## License
 
 MIT
