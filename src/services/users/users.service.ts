@@ -17,9 +17,12 @@ import {
 } from '../../core/exceptions/domain-exceptions';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -33,11 +36,18 @@ export class UsersService {
     const name = new Name(registerUserDto.name);
     const password = new Password(registerUserDto.password);
 
+    this.logger.debug(
+      `Attempting to register user with email: ${email.getValue()}`,
+    );
+
     const existingUser = await this.db.query.users.findFirst({
       where: (users, { eq }) => eq(users.email, email.getValue()),
     });
 
     if (existingUser) {
+      this.logger.warn(
+        `Registration failed — email already exists: ${email.getValue()}`,
+      );
       throw new EntityAlreadyExistsException('User', 'email');
     }
 
@@ -53,11 +63,13 @@ export class UsersService {
       passwordHash: newUser.passwordHash,
     });
 
-    console.log('User successfully inserted');
+    this.logger.log(
+      `User successfully registered with ID: ${newUser.id.getValue()}`,
+    );
   }
 
   async login(loginDto: LoginDto): Promise<{ token: string }> {
-    console.log({ loginDto });
+    this.logger.debug(`Attempting login for email: ${loginDto.email}`);
 
     const { email, password } = loginDto;
 
@@ -68,6 +80,7 @@ export class UsersService {
     });
 
     if (!user) {
+      this.logger.warn(`Login failed: User not found for email ${email}`);
       throw new EntityNotFoundException('User');
     }
 
@@ -77,6 +90,7 @@ export class UsersService {
     );
 
     if (!validPassword) {
+      this.logger.warn(`Login failed: Invalid password for email ${email}`);
       throw new UnauthorizedException('Invalid Password');
     }
 
@@ -84,23 +98,36 @@ export class UsersService {
 
     const token = this.generateAccessToken(payload);
 
+    this.logger.log(`Login successful for user: ${user.id}`);
     return { token };
   }
 
   async getInfo(token: string) {
-    const payload = await this.jwtService.verifyAsync(token, {
-      secret: this.configService.get('JWT_SECRET'),
-    });
+    this.logger.debug('Verifying JWT token');
 
-    console.log('JWT payload:', payload);
+    let payload: any;
+    try {
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+      this.logger.debug(`Token payload decoded: ${JSON.stringify(payload)}`);
+    } catch (error) {
+      this.logger.warn(`Token verification failed: ${error.message}`);
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    this.logger.debug(`Fetching user with email: ${payload.email}`);
 
     const user = await this.db.query.users.findFirst({
       where: (users, { eq }) => eq(users.email, payload.email),
     });
 
     if (!user) {
+      this.logger.warn(`User not found for email: ${payload.email}`);
       throw new EntityNotFoundException('User');
     }
+
+    this.logger.log(`User info retrieved for user ID: ${user.id}`);
 
     const { passwordHash, ...safeUser } = user;
 
