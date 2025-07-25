@@ -23,6 +23,20 @@ services:
     volumes:
       - redis_data:/data
 
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DATABASE_URL: postgres://nestuser:nestpassword@postgres:5432/nestdb
+      JWT_SECRET: 0ecff8a3a1b97598bc9a1910c777f6f8d1fbd08da6034d5c8f4bee1b0ef60c07
+      JWT_ACCESS_EXPIRATION: 15m
+    depends_on:
+      - redis
+      - postgres
+
 volumes:
   postgres_data:
   redis_data:

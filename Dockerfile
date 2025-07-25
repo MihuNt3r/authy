@@ -20,5 +20,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Run migrations before starting the app
-#CMD npm run db:migrate && node dist/src/main.js
-CMD node dist/src/main.js
+CMD npm run db:migrate && node dist/src/main.js
