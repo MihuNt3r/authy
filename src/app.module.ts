@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { RedisModule } from './redis/redis.module';
 import { UsersService } from './services/users/users.service';
 import { UsersController } from './controllers/users/users.controller';
 import { DrizzleModule } from './drizzle/drizzle.module';
@@ -18,6 +19,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
     }),
     DrizzleModule,
+    RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [UsersController],

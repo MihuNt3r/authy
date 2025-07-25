@@ -14,16 +14,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
     ports:
-      - "8080:80"
-    depends_on:
-      - postgres
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 volumes:
   postgres_data:
+  redis_data:
