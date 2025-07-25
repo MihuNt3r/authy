@@ -9,6 +9,10 @@ A progressive [NestJS](https://nestjs.com/) API for user authentication, built w
 - API documentation via Swagger
 - Domain-Driven Design (DDD) architecture
 
+## Caching
+
+This project implements JWT token caching using Redis. When a user logs in, their JWT token and payload are cached in Redis, allowing faster authentication and user info retrieval.
+
 ## Domain Model
 
 This project uses DDD concepts, including Entities and Value Objects:
@@ -96,7 +100,4 @@ To stop the services, press `Ctrl+C` or run:
 
 ```sh
 docker-compose down
-
-## License
-
-MIT
+```
