@@ -18,6 +18,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import Redis from 'ioredis';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +29,7 @@ export class UsersService {
     private readonly configService: ConfigService,
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof schema>,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
@@ -95,25 +97,45 @@ export class UsersService {
     }
 
     const payload = this.buildPayload(user);
-
     const token = this.generateAccessToken(payload);
 
-    this.logger.log(`Login successful for user: ${user.id}`);
+    // Cache the JWT token with user payload for faster getInfo operations
+    const tokenCacheKey = `jwt:${token}`;
+    const tokenTtl = this.getTokenTtl(); // Get TTL from JWT config or default to 1 hour
+    await this.redis.setex(tokenCacheKey, tokenTtl, JSON.stringify(payload));
+
+    this.logger.log(`Login successful for user: ${user.id}, token cached`);
     return { token };
   }
 
   async getInfo(token: string) {
     this.logger.debug('Verifying JWT token');
 
+    // Check if JWT token is cached first
+    const tokenCacheKey = `jwt:${token}`;
+    const cachedPayload = await this.redis.get(tokenCacheKey);
+
     let payload: any;
-    try {
-      payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get('JWT_SECRET'),
-      });
-      this.logger.debug(`Token payload decoded: ${JSON.stringify(payload)}`);
-    } catch (error) {
-      this.logger.warn(`Token verification failed: ${error.message}`);
-      throw new UnauthorizedException('Invalid token');
+    if (cachedPayload) {
+      this.logger.debug('JWT token found in cache, skipping verification');
+      payload = JSON.parse(cachedPayload);
+    } else {
+      this.logger.debug('JWT token not cached, performing verification');
+
+      try {
+        payload = await this.jwtService.verifyAsync(token, {
+          secret: this.configService.get('JWT_SECRET'),
+        });
+
+        // Cache the verified JWT token payload
+        const tokenTtl = this.getTokenTtl();
+        await this.redis.setex(tokenCacheKey, tokenTtl, JSON.stringify(payload));
+
+        this.logger.debug(`JWT token verified and cached: ${JSON.stringify(payload)}`);
+      } catch (error) {
+        this.logger.warn(`JWT token verification failed: ${error.message}`);
+        throw new UnauthorizedException('Invalid token');
+      }
     }
 
     this.logger.debug(`Fetching user with email: ${payload.email}`);
@@ -172,5 +194,25 @@ export class UsersService {
     hashedPassword: string,
   ): Promise<boolean> {
     return await bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  private getTokenTtl(): number {
+    const jwtExpiresIn = this.configService.get('JWT_EXPIRES_IN') || '1h';
+
+    // Convert JWT expiration to seconds for Redis TTL
+    if (typeof jwtExpiresIn === 'string') {
+      if (jwtExpiresIn.endsWith('h')) {
+        return parseInt(jwtExpiresIn) * 3600; // hours to seconds
+      } else if (jwtExpiresIn.endsWith('m')) {
+        return parseInt(jwtExpiresIn) * 60; // minutes to seconds
+      } else if (jwtExpiresIn.endsWith('d')) {
+        return parseInt(jwtExpiresIn) * 86400; // days to seconds
+      } else if (jwtExpiresIn.endsWith('s')) {
+        return parseInt(jwtExpiresIn); // already in seconds
+      }
+    }
+
+    // Default to 1 hour if parsing fails
+    return 3600;
   }
 }
