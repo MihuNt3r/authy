@@ -16,5 +16,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Expose the port Nest.js listens on
+EXPOSE 3000
+
 # Run migrations before starting the app
-CMD npm run db:migrate && node dist/main.js
+#CMD npm run db:migrate && node dist/src/main.js
+CMD node dist/src/main.js
